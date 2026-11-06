@@ -32,6 +32,7 @@ Paths that exist now, with their purpose. Later tasks add rows.
 | `tools/hygiene/scan.py` | Denylist, IP, email and TODO scan. |
 | `tools/hooks/commit_msg.py` | Commit-msg and identity rules. |
 | `tools/docs/` | Doc checkers. |
+| `tools/gh/` | GitHub client, link rules and label sync. |
 | `docs/` | These docs. |
 
 See the [docs index](../README.md) and the [taxonomy](taxonomy.md).

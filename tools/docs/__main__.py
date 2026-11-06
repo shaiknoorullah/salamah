@@ -32,12 +32,15 @@ def _changed(args: argparse.Namespace, root: Path) -> tuple[list[str], bool] | N
         out = subprocess.run(cmd, check=True, capture_output=True, text=True).stdout
         return out.split(), False
     try:
-        from tools.gh import api  # lazy: lands in step 3
+        from tools.gh.api import GitHub  # lazy: keeps `check` free of the client
     except ImportError:
         return None
-    pr = api.pr_info(args.pr)  # assumed: {"files": [...], "labels": [...], "body": str}
-    skip = "no-doc-change" in pr["labels"] and bool(_REASON.search(pr["body"] or ""))
-    return list(pr["files"]), skip
+    gh = GitHub.from_env()
+    files = [f["filename"] for f in gh.paginate(f"/repos/{gh.repo}/pulls/{args.pr}/files")]
+    pr = gh.request("GET", f"/repos/{gh.repo}/pulls/{args.pr}")
+    labels = [lb["name"] for lb in pr.get("labels", [])]
+    skip = "no-doc-change" in labels and bool(_REASON.search(pr.get("body") or ""))
+    return files, skip
 
 
 def _stale(args: argparse.Namespace, root: Path) -> int:
