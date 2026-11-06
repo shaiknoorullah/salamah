@@ -66,3 +66,5 @@ Every vocabulary the tools read: commit types, areas, doc types, labels and mile
 | M1 Foundation | Build steps 0-8 done; gate required; J1 green 3 nights (or 3 local passes when CI_VM=no). |
 | M2 Principles | Philosophy, principles and goals written by the owner. |
 | M3 Home on NixOS | Install test green 7 nights; the PC reinstalled. |
+
+See the [docs index](../README.md).

@@ -1,0 +1,8 @@
+extends: existence
+message: "Cut the hedge '%s'."
+ignorecase: true
+level: error
+tokens:
+  - it seems
+  - I think
+  - might possibly

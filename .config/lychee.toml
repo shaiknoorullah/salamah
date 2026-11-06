@@ -1,0 +1,2 @@
+exclude_path = ["tests/golden"]
+no_progress = true
