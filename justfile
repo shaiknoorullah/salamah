@@ -15,6 +15,7 @@ check-fast:
     treefmt --fail-on-change
     ruff check --config .config/ruff.toml tools
     just test
+    python3 -m tools.hygiene.scan $(git ls-files)
 
 # Run the Nix checks, then the fast checks.
 check:
