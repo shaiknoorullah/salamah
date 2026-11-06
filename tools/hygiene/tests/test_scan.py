@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.hygiene.scan import Finding, load_denylist, main, scan_text
+from tools.hygiene.scan import REDACTED, Finding, load_denylist, main, redact, scan_diff, scan_text
 
 IP = "10.0." + "14.2"
 TODO = "TO" + "DO: fix"
@@ -146,3 +146,14 @@ def test_repo_scan_is_clean():
             continue
         findings += scan_text(text, str(rel), [])
     assert findings == []
+
+
+def test_path_holding_term_is_redacted():
+    d = deny("acme")
+    diff = "+++ b/acme/x.py\n@@ -0,0 +1,2 @@\n+hello\n+" + "10.0." + "14.2\n"
+    found = scan_diff(diff, d)
+    assert found == [
+        Finding(REDACTED, 0, "denylist:1"),
+        Finding(REDACTED, 2, "private-ip"),
+    ]
+    assert redact([Finding("docs/acme.md", 3, "email")], d) == [Finding(REDACTED, 3, "email")]

@@ -72,6 +72,9 @@ class GitHub:
     ) -> Any:
         return self._decode(*self._send(method, self._base + path, body, accept))
 
+    def request_bytes(self, path: str, *, accept: str = "application/vnd.github.raw") -> bytes:
+        return self._send("GET", self._base + path, None, accept)[1]
+
     def paginate(self, path: str) -> Iterator[dict]:
         url: str | None = self._base + path
         while url:

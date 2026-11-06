@@ -29,6 +29,9 @@ EMAIL = re.compile(r"[\w.+-]+@[\w-]+(\.[\w-]+)+")
 TODO = re.compile(r"\b(TODO|FIXME)\b(?!\(#\d+\))\s*:")
 
 
+REDACTED = "<redacted path>"
+
+
 @dataclass(frozen=True)
 class Finding:
     source: str
@@ -80,20 +83,29 @@ def _git(*args: str) -> str:
     return subprocess.run(["git", *args], check=True, capture_output=True, text=True).stdout
 
 
-def _scan_diff(diff: str, deny: Sequence[re.Pattern[str]]) -> list[Finding]:
+def redact(findings: Sequence[Finding], deny: Sequence[re.Pattern[str]]) -> list[Finding]:
+    """Hide any source (a path) that itself holds a denylist term."""
+    hide = {f.source for f in findings if any(p.search(f.source) for p in deny)}
+    return [Finding(REDACTED, f.line, f.rule) if f.source in hide else f for f in findings]
+
+
+def scan_diff(diff: str, deny: Sequence[re.Pattern[str]]) -> list[Finding]:
     findings: list[Finding] = []
     path: str | None = None
     new_line = 0
     for raw in diff.splitlines():
         if raw.startswith("+++ "):
             path = raw[6:] if raw.startswith("+++ b/") else None
+            if path is not None:
+                rules = [r for r in _line_rules(path, deny) if r.startswith("denylist:")]
+                findings += [Finding(path, 0, r) for r in rules[:1]]
         elif raw.startswith("@@"):
             m = re.match(r"@@ -\S+ \+(\d+)", raw)
             new_line = int(m.group(1)) if m else 0
         elif raw.startswith("+") and path is not None:
             findings += [Finding(path, new_line, r) for r in _line_rules(raw[1:], deny)]
             new_line += 1
-    return findings
+    return redact(findings, deny)
 
 
 def _scan_commits(rev: str, deny: Sequence[re.Pattern[str]]) -> list[Finding]:
@@ -136,16 +148,16 @@ def main(argv: Sequence[str] | None = None) -> int:
         deny = []
 
     if args.staged:
-        findings = _scan_diff(_git("diff", "--cached", "-U0", "--no-color", "--no-ext-diff"), deny)
+        findings = scan_diff(_git("diff", "--cached", "-U0", "--no-color", "--no-ext-diff"), deny)
     elif args.range:
         diff = _git("diff", "-U0", "--no-color", "--no-ext-diff", args.range)
-        findings = _scan_diff(diff, deny) + _scan_commits(args.range, deny)
+        findings = scan_diff(diff, deny) + _scan_commits(args.range, deny)
     elif args.stdin is not None:
         findings = scan_text(sys.stdin.read(), args.stdin, deny)
     else:
         findings = [f for path in args.paths for f in _scan_path(path, deny)]
 
-    for f in findings:
+    for f in redact(findings, deny):
         print(f"{f.source}:{f.line}: {f.rule}")
     return 1 if findings else 0
 

@@ -81,3 +81,9 @@ def test_from_env(monkeypatch):
     monkeypatch.delenv("GITHUB_TOKEN")
     with pytest.raises(GitHubError):
         GitHub.from_env()
+
+
+def test_request_bytes_returns_raw():
+    gh, calls = make([Resp(b"\x89PNG\x00\xff", "application/octet-stream")])
+    assert gh.request_bytes("/repos/o/r/contents/a.png?ref=x") == b"\x89PNG\x00\xff"
+    assert calls[0].get_header("Accept") == "application/vnd.github.raw"

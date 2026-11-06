@@ -1,0 +1,127 @@
+name: github
+
+on:
+  issues:
+    types: [opened, edited]
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened, labeled, unlabeled]
+  push:
+    branches: [main]
+    paths:
+      - docs/reference/taxonomy.md
+      - .github/workflows/github.yml
+      - tools/gh/**
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: github-${{ github.event_name }}-${{ github.event.pull_request.number || github.event.issue.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  issue:
+    if: github.event_name == 'issues'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Write denylist file
+        env:
+          DENYLIST: ${{ secrets.DENYLIST }}
+        run: printf '%s\n' "$DENYLIST" > "$RUNNER_TEMP/denylist"
+      - name: Handle issue
+        env:
+          SALAMAH_DENYLIST: ${{ runner.temp }}/denylist
+        run: python3 -m tools.gh.events issue
+
+  pr-meta:
+    if: github.event_name == 'pull_request_target'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Copy issue labels and milestone
+        run: python3 -m tools.gh.events pr-meta
+
+  pr-ocr:
+    if: github.event_name == 'pull_request_target'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install tesseract
+        run: sudo apt-get update && sudo apt-get install -y tesseract-ocr
+      - name: OCR changed PNG files
+        run: python3 -m tools.gh.events pr-ocr > ocr.json
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ocr
+          path: ocr.json
+          retention-days: 1
+
+  pr-scan:
+    needs: pr-ocr
+    if: github.event_name == 'pull_request_target'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+      statuses: write
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: ocr
+      - name: Write denylist file
+        env:
+          DENYLIST: ${{ secrets.DENYLIST }}
+        run: printf '%s\n' "$DENYLIST" > "$RUNNER_TEMP/denylist"
+      - name: Scan pull request
+        env:
+          SALAMAH_DENYLIST: ${{ runner.temp }}/denylist
+          OCR_JSON: ocr.json
+        run: python3 -m tools.gh.events pr-scan --require-denylist
+
+  sync:
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Sync labels and milestones
+        run: python3 -m tools.gh.events sync
