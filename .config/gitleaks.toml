@@ -1,0 +1,17 @@
+[extend]
+useDefault = true
+
+[[rules]]
+id = "email-not-allowlisted"
+description = "Email address outside the allowlist"
+regex = '''[\w.+-]+@[\w-]+(\.[\w-]+)+'''
+keywords = ["@"]
+
+[[rules.allowlists]]
+regexTarget = "match"
+regexes = [
+    '''^72301805\+shaiknoorullah@users\.noreply\.github\.com$''',
+    '''^noreply@anthropic\.com$''',
+    '''^noreply@github\.com$''',
+    '''@example\.(com|org|net)$''',
+]

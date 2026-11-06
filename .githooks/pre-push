@@ -1,0 +1,13 @@
+#!/bin/sh
+set -eu
+cd "$(git rev-parse --show-toplevel)"
+if command -v nix >/dev/null 2>&1; then
+	nix develop -c just check-fast
+elif command -v just >/dev/null 2>&1; then
+	just check-fast
+else
+	echo "lite mode: nix and just skipped"
+	python3 -m pytest -c .config/pytest.ini tools
+fi
+upstream="$(git rev-parse --abbrev-ref '@{u}' 2>/dev/null || echo origin/main)"
+python3 -m tools.hygiene.scan --require-denylist --range "$upstream..HEAD"
