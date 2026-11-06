@@ -1,0 +1,15 @@
+extends: existence
+message: "Cut the filler word '%s'."
+ignorecase: true
+level: error
+tokens:
+  - basically
+  - actually
+  - very
+  - really
+  - simply
+  - obviously
+  - clearly
+  - utilize
+  - leverage
+  - in order to

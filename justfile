@@ -20,12 +20,15 @@ check-fast:
 
 # Run the Nix checks, then the fast checks.
 check:
-    nix build --no-link .#checks.x86_64-linux.formatting .#checks.x86_64-linux.unit
+    nix build --no-link .#checks.x86_64-linux.formatting .#checks.x86_64-linux.unit .#checks.x86_64-linux.docs
     just check-fast
 
-# Check the docs: front matter, index, refs and caps.
+# Check the docs: checkers, rumdl, Vale and lychee (offline).
 docs:
     python3 -m tools.docs check
+    rumdl check --config .config/rumdl.toml .
+    vale --config .config/vale.ini docs $(ls README.md AGENTS.md 2>/dev/null)
+    lychee --offline --include-fragments --config .config/lychee.toml 'docs/**/*.md' README.md
 
 # Report missing tools and uninstalled git hooks.
 doctor:
