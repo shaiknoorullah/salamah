@@ -16,11 +16,16 @@ check-fast:
     ruff check --config .config/ruff.toml tools
     just test
     python3 -m tools.hygiene.scan $(git ls-files)
+    just docs
 
 # Run the Nix checks, then the fast checks.
 check:
     nix build --no-link .#checks.x86_64-linux.formatting .#checks.x86_64-linux.unit
     just check-fast
+
+# Check the docs: front matter, index, refs and caps.
+docs:
+    python3 -m tools.docs check
 
 # Report missing tools and uninstalled git hooks.
 doctor:
