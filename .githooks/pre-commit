@@ -1,0 +1,14 @@
+#!/bin/sh
+set -eu
+cd "$(git rev-parse --show-toplevel)"
+have() { command -v "$1" >/dev/null 2>&1 || {
+	echo "lite mode: $1 skipped"
+	return 1
+}; }
+staged() { git diff --cached --name-only --diff-filter=ACM -z; }
+python3 -m tools.hooks.commit_msg identity "$(git config user.email)"
+have gitleaks && gitleaks git --pre-commit --staged --redact --config .config/gitleaks.toml
+have typos && { staged | xargs -0 -r typos --config .config/typos.toml; }
+python3 -m tools.hygiene.scan --staged
+have treefmt && { staged | xargs -0 -r treefmt --fail-on-change; }
+exit 0
