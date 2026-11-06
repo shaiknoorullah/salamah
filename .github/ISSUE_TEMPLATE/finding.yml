@@ -1,0 +1,55 @@
+name: Finding (agent)
+description: Something an agent found while working
+labels:
+  - agent-filed
+body:
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type
+      options:
+        - bug
+        - feature
+        - docs
+        - chore
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      multiple: true
+      options:
+        - shell
+        - desktop
+        - host
+        - harness
+        - docs
+        - agents
+        - repo
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+    validations:
+      required: true
+  - type: textarea
+    id: suggested-fix
+    attributes:
+      label: Suggested fix
+    validations:
+      required: false
+  - type: textarea
+    id: session
+    attributes:
+      label: Session
+    validations:
+      required: false

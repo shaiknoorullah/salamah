@@ -50,5 +50,23 @@ def test_main_pr_needs_gh(capsys, monkeypatch):
     import sys
 
     monkeypatch.setitem(sys.modules, "tools.gh", None)
+    monkeypatch.setitem(sys.modules, "tools.gh.api", None)
     assert main(["stale", "--pr", "1"]) == 2
     assert "needs tools.gh" in capsys.readouterr().err
+
+
+def test_main_pr_uses_github(capsys, monkeypatch, tmp_path):
+    import tools.gh.api as api
+
+    class Fake:
+        repo = "o/r"
+
+        def paginate(self, path):
+            assert path == "/repos/o/r/pulls/7/files"
+            return iter([{"filename": "src/f.py"}])
+
+        def request(self, method, path):
+            return {"labels": [{"name": "no-doc-change"}], "body": "No doc change: tiny"}
+
+    monkeypatch.setattr(api.GitHub, "from_env", classmethod(lambda cls: Fake()))
+    assert main(["stale", "--root", str(tmp_path), "--pr", "7"]) == 0

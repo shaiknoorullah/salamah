@@ -1,0 +1,45 @@
+name: Decision (owner)
+description: A decision only the owner can make
+labels:
+  - docs
+  - needs-human
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      multiple: true
+      options:
+        - shell
+        - desktop
+        - host
+        - harness
+        - docs
+        - agents
+        - repo
+    validations:
+      required: true
+  - type: textarea
+    id: decision-needed
+    attributes:
+      label: Decision needed
+    validations:
+      required: true
+  - type: textarea
+    id: options
+    attributes:
+      label: Options
+    validations:
+      required: true
+  - type: textarea
+    id: recommendation
+    attributes:
+      label: Recommendation
+    validations:
+      required: false
+  - type: textarea
+    id: unblocks
+    attributes:
+      label: Unblocks
+    validations:
+      required: false

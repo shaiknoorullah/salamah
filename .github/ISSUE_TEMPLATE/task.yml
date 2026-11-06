@@ -1,0 +1,40 @@
+name: Task
+description: A unit of work
+body:
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type
+      options:
+        - feature
+        - docs
+        - chore
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      multiple: true
+      options:
+        - shell
+        - desktop
+        - host
+        - harness
+        - docs
+        - agents
+        - repo
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What
+    validations:
+      required: true
+  - type: textarea
+    id: done-when
+    attributes:
+      label: Done when
+    validations:
+      required: true
