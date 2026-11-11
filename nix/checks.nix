@@ -1,6 +1,7 @@
 {
   pkgs,
   self,
+  inputs,
   formatting,
 }:
 {
@@ -50,4 +51,9 @@
         lychee --offline --include-fragments --config .config/lychee.toml 'docs/**/*.md' README.md
         touch $out
       '';
+
+  # Needs KVM, so CI runs its driver in the e2e job and `just check` skips it.
+  desktop-e2e = pkgs.testers.runNixOSTest (
+    (import ../tests/e2e/desktop.nix) // { node.specialArgs = { inherit inputs; }; }
+  );
 }

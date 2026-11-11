@@ -7,13 +7,18 @@
       url = "git+https://github.com/numtide/treefmt-nix?shallow=1";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    home-manager = {
+      url = "git+https://github.com/nix-community/home-manager?shallow=1";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
-    {
+    inputs@{
       self,
       nixpkgs,
       treefmt-nix,
+      ...
     }:
     let
       system = "x86_64-linux";
@@ -29,7 +34,7 @@
       formatter.${system} = treefmtEval.config.build.wrapper;
 
       checks.${system} = import ./nix/checks.nix {
-        inherit pkgs self;
+        inherit pkgs self inputs;
         formatting = treefmtEval.config.build.check self;
       };
     };

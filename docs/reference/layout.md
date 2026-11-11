@@ -47,6 +47,14 @@ Paths that exist now, with their purpose. Later tasks add rows.
 | `tools/agents/` | Hook code and the agent config check. |
 | `tools/cloud_setup.py` | Cloud session setup steps. |
 | `tools/cloud-setup.sh` | Shell entry for the cloud setup. |
+| `hosts/home/default.nix` | Host `home`: imports the user and desktop modules. |
+| `modules/nixos/user.nix` | Option `salamah.user.name` and the normal user. |
+| `modules/nixos/desktop.nix` | Hyprland, greetd autologin, Quickshell, fonts and home-manager. |
+| `modules/home/desktop.nix` | Hyprland Lua config and the Quickshell config link. |
+| `shell/` | Quickshell bar in QML: `shell.qml`, `Bar.qml`, `BarContent.qml`. |
+| `shell/tests/` | QML unit tests run by `just test-qml`. |
+| `tests/vm/default.nix` | VM settings for tests: memory, cores and GPU. |
+| `tests/e2e/desktop.nix` | VM boot test that waits for Hyprland and the bar. |
 | `docs/` | These docs. |
 
 See the [docs index](../README.md) and the [taxonomy](taxonomy.md).
