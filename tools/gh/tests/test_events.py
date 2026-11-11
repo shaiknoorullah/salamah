@@ -273,3 +273,30 @@ def test_on_pr_scan_flags_binary_file_names():
     pr = {"number": 7, "title": "t", "body": "", "head": {"sha": "abc", "ref": "feat/7-x"}}
     found = events.on_pr_scan(gh, pr, DENY, [])
     assert [(f.source, f.rule) for f in found] == [(REDACTED, "denylist:1")]
+
+
+def test_changed_pngs_filters_status_and_suffix():
+    files = [
+        {"filename": "a.png", "status": "added"},
+        {"filename": "b.PNG", "status": "modified"},
+        {"filename": "c.png", "status": "removed"},
+        {"filename": "d.txt", "status": "added"},
+    ]
+    gh = FakeGitHub(pages={"/repos/o/r/pulls/9/files": files})
+    assert events.changed_pngs(gh, {"number": 9}) == ["a.png", "b.PNG"]
+
+
+@pytest.mark.parametrize(
+    ("files", "want"), [([], "false"), ([{"filename": "x.png", "status": "added"}], "true")]
+)
+def test_main_pr_has_png_writes_output(tmp_path, monkeypatch, files, want):
+    _event(tmp_path, monkeypatch, "pull_request", 9)
+    out = tmp_path / "out.txt"
+    monkeypatch.setenv("GITHUB_OUTPUT", str(out))
+    gh = FakeGitHub(
+        {("GET", "/repos/o/r/pulls/9"): {"number": 9}},
+        {"/repos/o/r/pulls/9/files": files},
+    )
+    monkeypatch.setattr(events.GitHub, "from_env", classmethod(lambda cls: gh))
+    assert events.main(["pr-has-png"]) == 0
+    assert out.read_text() == f"pngs={want}\n"
