@@ -15,8 +15,10 @@
     machine.wait_until_succeeds(hypr.format("-j layers") + " | grep -q quickshell", timeout=180)
     assert machine.succeed(hypr.format("configerrors")).strip() in ("", "[]")
 
-    # J1: boot to bar
-    machine.wait_for_text("salamah")
-    machine.screenshot("j1-bar")
+    # J1: boot to bar. The screenshot is taken even when the OCR wait fails (S3).
+    try:
+        machine.wait_for_text("salamah")
+    finally:
+        machine.screenshot("j1-bar")
   '';
 }
