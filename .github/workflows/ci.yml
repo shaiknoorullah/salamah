@@ -84,6 +84,8 @@ jobs:
       - name: Run VM test
         id: e2e
         run: mkdir -p out && ./result/bin/nixos-test-driver -o out
+      - name: Check screenshots
+        run: nix develop -c just visual
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:

@@ -55,6 +55,8 @@ Paths that exist now, with their purpose. Later tasks add rows.
 | `shell/tests/` | QML unit tests run by `just test-qml`. |
 | `tests/vm/default.nix` | VM settings for tests: memory, cores and GPU. |
 | `tests/e2e/desktop.nix` | VM boot test that waits for Hyprland and the bar. |
+| `tools/visual/` | Screenshot checks: J1 bar test, pixel diff, contact sheet. |
+| `tests/visual/masks.toml` | Mask boxes per screenshot for the diff. |
 | `docs/` | These docs. |
 
 See the [docs index](../README.md) and the [taxonomy](taxonomy.md).

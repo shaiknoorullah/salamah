@@ -23,6 +23,9 @@ Nix flakes see only git-tracked files. Run `git add -A` before a `nix` command t
 - `just test` runs the Python tests, then `just test-qml`.
 - `just test-qml` runs the QML tests headless.
 - `just docs` runs the doc checkers and linters.
+- `just e2e` builds the VM test driver, runs the desktop test into `out/`, then runs `just visual`.
+- `just visual` checks out/j1-bar.png and compares it to the golden when one exists.
+- `just golden-update` is for the owner only. Agents never run it. See [goldens](goldens.md).
 
 ## QML tests
 
