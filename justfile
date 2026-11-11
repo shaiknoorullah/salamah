@@ -17,6 +17,7 @@ check-fast:
     just test
     python3 -m tools.hygiene.scan $(git ls-files)
     just docs
+    python3 -m tools.agents.check
 
 # Run the Nix checks, then the fast checks.
 check:

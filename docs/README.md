@@ -18,6 +18,7 @@ Index of every doc. Folder READMEs list their own siblings.
 
 - [Reference index](reference/README.md)
 - [Layout](reference/layout.md)
+- [Skills](reference/skills.md)
 - [Taxonomy](reference/taxonomy.md)
 
 ## Explanation
