@@ -59,6 +59,10 @@ A hook that gets bad input denies for the guards and passes for the rest.
 
 Run `sh tools/cloud-setup.sh` to install `just` and warm the Nix dev shell. It always exits 0. The log is at ~/.cache/salamah/cloud-setup.log.
 
+## Scheduled jobs
+
+The nightly e2e reports to the issue in repo variable NIGHTLY_ISSUE. The weekly scan runs `python3 -m tools.docs issue-links` and `python3 -m tools.docs stale --since 7 --mode issues`.
+
 ## Pre-push denylist
 
 The pre-push hook needs a denylist when the remote is public. Set `$SALAMAH_DENYLIST` or create ~/.config/salamah/denylist. Scan output never prints a matched term.

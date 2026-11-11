@@ -70,3 +70,31 @@ def test_main_pr_uses_github(capsys, monkeypatch, tmp_path):
 
     monkeypatch.setattr(api.GitHub, "from_env", classmethod(lambda cls: Fake()))
     assert main(["stale", "--root", str(tmp_path), "--pr", "7"]) == 0
+
+
+def test_main_stale_since_files_issue(tmp_path, monkeypatch):
+    def git(*a):
+        subprocess.run(["git", "-C", str(tmp_path), *a], check=True, capture_output=True)
+
+    git("init", "-q")
+    git("config", "user.email", "noreply@example.com")
+    git("config", "user.name", "t")
+    (tmp_path / "docs").mkdir()
+    fm = "---\ntype: guide\nstatus: current\ncovers: [src/*]\nreviewed: 2026-11-05\n---\n"
+    (tmp_path / "docs" / "a.md").write_text(fm + "x\n")
+    (tmp_path / "src").mkdir()
+    (tmp_path / "src" / "f.py").write_text("1\n")
+    git("add", "-A")
+    monkeypatch.setenv("GIT_COMMITTER_DATE", "2020-01-01T00:00:00")
+    git("commit", "-qm", "one")
+    monkeypatch.delenv("GIT_COMMITTER_DATE")
+    (tmp_path / "src" / "f.py").write_text("2\n")
+    git("commit", "-qam", "two")
+    filed = []
+    monkeypatch.setattr("tools.gh.api.GitHub.from_env", classmethod(lambda cls: "gh"))
+    monkeypatch.setattr("tools.gh.trackers.file_issue", lambda *a: filed.append(a) or 1)
+    args = ["stale", "--root", str(tmp_path), "--since", "7", "--mode", "issues"]
+    assert main(args) == 0
+    (call,) = filed
+    assert call[1:2] == ("docs: stale docs",) and "docs/a.md" in call[2] and "src/f.py" in call[2]
+    assert call[3:] == (["docs", "area:docs", "agent-filed"], "Backlog")
