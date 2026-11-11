@@ -16,7 +16,7 @@
     assert machine.succeed(hypr.format("configerrors")).strip() in ("", "[]")
 
     # J1: boot to bar
-    machine.wait_for_text("salamah")
+    machine.wait_for_text("nothing-here", timeout=10)
     machine.screenshot("j1-bar")
   '';
 }
