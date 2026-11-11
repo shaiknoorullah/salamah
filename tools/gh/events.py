@@ -70,12 +70,18 @@ def _run(cmd: list[str]) -> str:
     return done.stdout
 
 
+def changed_pngs(gh: GitHub, pr: Mapping) -> list[str]:
+    """Paths of PNG files the PR adds or changes."""
+    return [
+        f["filename"]
+        for f in gh.paginate(f"/repos/{gh.repo}/pulls/{pr['number']}/files")
+        if f.get("status") in _PNG_STATUS and f["filename"].lower().endswith(".png")
+    ]
+
+
 def ocr_pngs(gh: GitHub, pr: Mapping, run: Callable[[list[str]], str]) -> list[tuple[str, str]]:
     out: list[tuple[str, str]] = []
-    for f in gh.paginate(f"/repos/{gh.repo}/pulls/{pr['number']}/files"):
-        path = f["filename"]
-        if f.get("status") not in _PNG_STATUS or not path.lower().endswith(".png"):
-            continue
+    for path in changed_pngs(gh, pr):
         url = f"/repos/{gh.repo}/contents/{urllib.parse.quote(path)}?ref={pr['head']['sha']}"
         data = gh.request_bytes(url)
         with tempfile.NamedTemporaryFile(suffix=".png") as tmp:
@@ -167,7 +173,9 @@ def post_hygiene_status_msg(gh: GitHub, sha: str, message: str) -> None:
 
 def main(argv: Sequence[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="tools.gh.events")
-    ap.add_argument("cmd", choices=["issue", "pr-meta", "pr-ocr", "pr-scan", "pr-rules", "sync"])
+    ap.add_argument(
+        "cmd", choices=["issue", "pr-meta", "pr-has-png", "pr-ocr", "pr-scan", "pr-rules", "sync"]
+    )
     ap.add_argument("--require-denylist", action="store_true")
     args = ap.parse_args(argv)
     if args.cmd == "sync":
@@ -189,6 +197,15 @@ def main(argv: Sequence[str] | None = None) -> int:
             print(e)
         return 1 if errors else 0
     pr = gh.request("GET", f"/repos/{gh.repo}/pulls/{n}")
+    if args.cmd == "pr-has-png":
+        line = f"pngs={'true' if changed_pngs(gh, pr) else 'false'}\n"
+        target = os.environ.get("GITHUB_OUTPUT")
+        if target:
+            with open(target, "a", encoding="utf-8") as fh:
+                fh.write(line)
+        else:
+            print(line, end="")
+        return 0
     if args.cmd == "pr-meta":
         on_pr_meta(gh, pr, tax)
     else:
