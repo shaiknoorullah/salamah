@@ -33,11 +33,15 @@ Paths that exist now, with their purpose. Later tasks add rows.
 | `tools/hooks/commit_msg.py` | Commit-msg and identity rules. |
 | `tools/docs/` | Doc checkers. |
 | `tools/gh/` | GitHub client, link rules and label sync. |
+| `tools/gh/trackers.py` | Issue filing, nightly report and tracker readiness. |
+| `tools/docs/issue_links.py` | Flags doc links to closed issues. |
+| `tools/maint/` | Weekly flake update and pinned-action check. |
 | `tools/ci/` | Changed-file classifier and gate decision. |
 | `.github/ISSUE_TEMPLATE/` | Issue forms: bug, task, finding, decision. |
 | `.github/pull_request_template.md` | PR body headings. |
 | `.github/workflows/github.yml` | Issue triage, PR labels, hygiene scan, label sync. |
 | `.github/workflows/ci.yml` | CI jobs and the `gate` check. |
+| `.github/workflows/scheduled.yml` | Nightly e2e, weekly scan and weekly update. |
 | `.github/rulesets/main.json` | Ruleset for `main`, imported by the owner. |
 | `AGENTS.md` | Rules for every agent. |
 | `CLAUDE.md` | Symlink to `AGENTS.md`. |
@@ -55,6 +59,8 @@ Paths that exist now, with their purpose. Later tasks add rows.
 | `shell/tests/` | QML unit tests run by `just test-qml`. |
 | `tests/vm/default.nix` | VM settings for tests: memory, cores and GPU. |
 | `tests/e2e/desktop.nix` | VM boot test that waits for Hyprland and the bar. |
+| `tools/visual/` | Screenshot checks: J1 bar test, pixel diff, contact sheet. |
+| `tests/visual/masks.toml` | Mask boxes per screenshot for the diff. |
 | `docs/` | These docs. |
 
 See the [docs index](../README.md) and the [taxonomy](taxonomy.md).

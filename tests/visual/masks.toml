@@ -1,0 +1,5 @@
+# Mask boxes per screenshot, as [x, y, w, h] in pixels.
+# Compared pixels inside a box are skipped. Add boxes only for noise, such as a clock.
+
+[j1-bar]
+boxes = []

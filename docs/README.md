@@ -13,6 +13,7 @@ Index of every doc. Folder READMEs list their own siblings.
 
 - [Guides index](guides/README.md)
 - [Develop](guides/develop.md)
+- [Goldens](guides/goldens.md)
 
 ## Reference
 

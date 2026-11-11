@@ -1,0 +1,105 @@
+name: scheduled
+
+on:
+  schedule:
+    - cron: "17 2 * * *"
+    - cron: "23 3 * * 1"
+  workflow_dispatch:
+    inputs:
+      job:
+        description: Job to run
+        type: choice
+        options: [nightly-e2e, weekly-scan, weekly-update, all]
+        default: all
+
+permissions: {}
+
+jobs:
+  nightly-e2e:
+    if: >-
+      github.event.schedule == '17 2 * * *'
+      || inputs.job == 'nightly-e2e' || inputs.job == 'all'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      issues: write
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: cachix/install-nix-action@75c75c31ebece974e48ebc36b4ad125bd97bd97b # v31.11.3
+        with:
+          enable_kvm: true
+          extra_nix_config: |
+            system-features = nixos-test benchmark big-parallel kvm
+      - name: Check KVM
+        run: test -w /dev/kvm
+      - name: Build test driver
+        run: nix build -L .#checks.x86_64-linux.desktop-e2e.driver
+      - name: Run VM test
+        id: e2e
+        run: mkdir -p out && ./result/bin/nixos-test-driver -o out
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: e2e-out
+          path: out/
+      - name: Report nightly result
+        if: always()
+        env:
+          NIGHTLY_ISSUE: ${{ vars.NIGHTLY_ISSUE }}
+          E2E_OK: ${{ steps.e2e.outcome == 'success' }}
+        run: python3 -m tools.gh.trackers nightly --issue "$NIGHTLY_ISSUE" --ok "$E2E_OK"
+
+  weekly-scan:
+    if: >-
+      github.event.schedule == '23 3 * * 1'
+      || inputs.job == 'weekly-scan' || inputs.job == 'all'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      issues: write
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: cachix/install-nix-action@75c75c31ebece974e48ebc36b4ad125bd97bd97b # v31.11.3
+      - name: Check links
+        run: nix develop -c lychee --config .config/lychee.toml 'docs/**/*.md' README.md
+      - name: File stale docs
+        run: python3 -m tools.docs stale --since 7 --mode issues
+      - name: File closed-issue links
+        run: python3 -m tools.docs issue-links --file-issues
+      - name: Announce finished trackers
+        run: python3 -m tools.gh.trackers ready
+
+  weekly-update:
+    if: >-
+      github.event.schedule == '23 3 * * 1'
+      || inputs.job == 'weekly-update' || inputs.job == 'all'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      actions: write
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: cachix/install-nix-action@75c75c31ebece974e48ebc36b4ad125bd97bd97b # v31.11.3
+      - name: Update flake lock
+        run: nix develop -c python3 -m tools.maint.update update
+      - name: Check pinned actions
+        run: nix develop -c python3 -m tools.maint.update actions
