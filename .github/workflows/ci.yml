@@ -83,7 +83,7 @@ jobs:
         run: nix build -L .#checks.x86_64-linux.desktop-e2e.driver
       - name: Run VM test
         id: e2e
-        run: ./result/bin/nixos-test-driver -o out
+        run: mkdir -p out && ./result/bin/nixos-test-driver -o out
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
