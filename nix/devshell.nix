@@ -33,6 +33,8 @@ pkgs.mkShell {
   ]);
 
   env.PYTHONDONTWRITEBYTECODE = "1";
+  # qmltestrunner finds QtQuick.Window and other modules only through this path.
+  env.QML_IMPORT_PATH = "${pkgs.qt6.qtdeclarative}/lib/qt-6/qml";
 
   shellHook = ''
     git config core.hooksPath .githooks 2>/dev/null || true

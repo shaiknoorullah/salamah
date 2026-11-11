@@ -60,6 +60,36 @@ jobs:
       - name: Evaluate flake
         run: nix flake check --no-build
 
+  e2e:
+    needs: changes
+    if: needs.changes.outputs.desktop == 'true' || github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    continue-on-error: ${{ vars.E2E_SOFT != 'false' }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: cachix/install-nix-action@75c75c31ebece974e48ebc36b4ad125bd97bd97b # v31.11.3
+        with:
+          enable_kvm: true
+          extra_nix_config: |
+            system-features = nixos-test benchmark big-parallel kvm
+      - name: Check KVM
+        run: test -w /dev/kvm
+      - name: Build test driver
+        run: nix build -L .#checks.x86_64-linux.desktop-e2e.driver
+      - name: Run VM test
+        id: e2e
+        run: mkdir -p out && ./result/bin/nixos-test-driver -o out
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: e2e-out
+          path: out/
+
   pr-rules:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-24.04
@@ -83,7 +113,7 @@ jobs:
         run: python3 -m tools.docs stale --pr "$PR_NUMBER" --mode warn
 
   gate:
-    needs: [changes, fast, eval, pr-rules]
+    needs: [changes, fast, eval, e2e, pr-rules]
     if: always()
     runs-on: ubuntu-24.04
     timeout-minutes: 2

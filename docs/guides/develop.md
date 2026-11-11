@@ -1,7 +1,7 @@
 ---
 type: guide
 status: current
-covers: [justfile, .githooks/*, nix/devshell.nix]
+covers: [justfile, .githooks/*, nix/devshell.nix, shell/tests/*]
 reviewed: 2026-11-05
 ---
 
@@ -20,7 +20,15 @@ Nix flakes see only git-tracked files. Run `git add -A` before a `nix` command t
 - `just hooks` sets `core.hooksPath` to the repo hooks.
 - `just check-fast` runs the quick checks.
 - `just check` runs the full gate locally.
+- `just test` runs the Python tests, then `just test-qml`.
+- `just test-qml` runs the QML tests headless.
 - `just docs` runs the doc checkers and linters.
+
+## QML tests
+
+The runner is `qmltestrunner` from `qt6.qtdeclarative`, which the dev shell provides. The shell sets `QML_IMPORT_PATH` so the runner finds `QtQuick.Window`.
+
+Run `QT_QPA_PLATFORM=offscreen qmltestrunner -input shell/tests`. Tests live in `shell/tests/`.
 
 ## Lite mode
 

@@ -9,6 +9,11 @@ fmt:
 # Run the unit tests.
 test:
     python3 -m pytest -c .config/pytest.ini tools
+    just test-qml
+
+# Run the QML tests headless.
+test-qml:
+    QT_QPA_PLATFORM=offscreen qmltestrunner -input shell/tests
 
 # Run the fast checks: format, lint and tests.
 check-fast:
