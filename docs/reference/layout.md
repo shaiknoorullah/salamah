@@ -39,6 +39,14 @@ Paths that exist now, with their purpose. Later tasks add rows.
 | `.github/workflows/github.yml` | Issue triage, PR labels, hygiene scan, label sync. |
 | `.github/workflows/ci.yml` | CI jobs and the `gate` check. |
 | `.github/rulesets/main.json` | Ruleset for `main`, imported by the owner. |
+| `AGENTS.md` | Rules for every agent. |
+| `CLAUDE.md` | Symlink to `AGENTS.md`. |
+| `.claude/settings.json` | Agent hooks and permission denies. |
+| `.claude/skills/` | Repo skills, one folder each. |
+| `.claude/agents/` | Subagent definitions with pinned models. |
+| `tools/agents/` | Hook code and the agent config check. |
+| `tools/cloud_setup.py` | Cloud session setup steps. |
+| `tools/cloud-setup.sh` | Shell entry for the cloud setup. |
 | `docs/` | These docs. |
 
 See the [docs index](../README.md) and the [taxonomy](taxonomy.md).
