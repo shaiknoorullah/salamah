@@ -117,6 +117,14 @@ This repo is public. Nothing private may reach a file, issue, PR, commit or scre
   - `noreply@github.com`
 - Agent commits use the author `Claude <noreply@anthropic.com>`.
 
+## Agent skills
+
+The owner installed the Matt Pocock skills plugin. Its repo config is the [agent skills config](docs/reference/agent-skills.md).
+
+- Where a plugin skill clashes with this file, this file wins.
+- Re-run `setup-matt-pocock-skills` only when the owner asks.
+- Terms live in the [glossary](docs/reference/glossary.md). Decisions live in `docs/decisions/`.
+
 ## Philosophy
 
 The owner writes these three docs. Read them, and do not draft them.

@@ -31,6 +31,7 @@ The recipes behind `visual-test` and `e2e-vm` land in step 7 (#9). Issue #18 tra
 |---|---|---|
 | [superpowers](https://github.com/obra/superpowers) | Adopt at user scope | Brainstorming, writing-plans, TDD and verification. |
 | [anthropics/skills](https://github.com/anthropics/skills) | Adopt at user scope | The skill-creator skill only. |
+| [mattpocock/skills](https://github.com/mattpocock/skills) | Adopt as a plugin | Interview and planning skills. Repo config in [agent skills config](agent-skills.md). |
 | Vendored third-party skill packs | Reject | Licences and noise. |
 
 See the [reference index](README.md).
