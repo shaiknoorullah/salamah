@@ -18,6 +18,8 @@ Index of every doc. Folder READMEs list their own siblings.
 ## Reference
 
 - [Reference index](reference/README.md)
+- [Agent skills config](reference/agent-skills.md)
+- [Glossary](reference/glossary.md)
 - [Layout](reference/layout.md)
 - [Skills](reference/skills.md)
 - [Taxonomy](reference/taxonomy.md)
