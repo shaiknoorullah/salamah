@@ -17,7 +17,7 @@
 
     # J1: boot to bar. The screenshot is taken even when the OCR wait fails (S3).
     try:
-        machine.wait_for_text("salamah")
+        machine.wait_for_text("nothing-here", timeout=10)
     finally:
         machine.screenshot("j1-bar")
   '';
