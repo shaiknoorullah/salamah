@@ -74,7 +74,12 @@ def check_actions(gh: GitHub, run: Run) -> int | None:
 
 
 def _run(argv: Sequence[str]) -> str:
-    return subprocess.run(argv, check=True, capture_output=True, text=True).stdout
+    done = subprocess.run(argv, capture_output=True, text=True)
+    if done.returncode != 0:
+        # Show why a command failed (for example git push); output holds no secrets.
+        print(done.stderr.strip(), file=sys.stderr)
+        raise subprocess.CalledProcessError(done.returncode, argv, done.stdout, done.stderr)
+    return done.stdout
 
 
 def main(argv: Sequence[str] | None = None) -> int:

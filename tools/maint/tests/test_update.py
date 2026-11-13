@@ -1,3 +1,5 @@
+import subprocess
+import sys
 from datetime import date
 from subprocess import CalledProcessError
 
@@ -133,3 +135,10 @@ def test_check_actions_clean():
     gh = FakeGitHub(log)
     assert update.check_actions(gh, fake_run(log)) is None
     assert gh.calls == [] and ("run", "git", "checkout", "--", ".github") not in log
+
+
+def test_run_surfaces_stderr_on_failure(capsys):
+    cmd = [sys.executable, "-c", "import sys; sys.stderr.write('remote: denied'); sys.exit(1)"]
+    with pytest.raises(subprocess.CalledProcessError):
+        update._run(cmd)
+    assert "remote: denied" in capsys.readouterr().err
