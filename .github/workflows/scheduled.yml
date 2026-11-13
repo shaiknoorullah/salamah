@@ -99,7 +99,14 @@ jobs:
         with:
           fetch-depth: 0
       - uses: cachix/install-nix-action@75c75c31ebece974e48ebc36b4ad125bd97bd97b # v31.11.3
+      # The devShell turns on .githooks; pre-push needs the denylist (#29).
+      - name: Write denylist file
+        env:
+          DENYLIST: ${{ secrets.DENYLIST }}
+        run: printf '%s\n' "$DENYLIST" > "$RUNNER_TEMP/denylist"
       - name: Update flake lock
+        env:
+          SALAMAH_DENYLIST: ${{ runner.temp }}/denylist
         run: nix develop -c python3 -m tools.maint.update update
       - name: Check pinned actions
         run: nix develop -c python3 -m tools.maint.update actions
